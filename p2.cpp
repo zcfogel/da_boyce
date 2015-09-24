@@ -1,19 +1,43 @@
-#ifndef P2_H
-#define P2_H
-
 #include "recursive.h"
+
+/*
+ * Effects: Returns the sum of each element in the list
+ */
+static int sum_helper(list_t list, int result)
+{
+	if (list_isEmpty(list)) return result;
+
+	return sum_helper(list_rest(list), list_first(list) + result);
+}
 
 /*
  * EFFECTS: returns the sum of each element in list
  *          zero if the list is empty.
  */
-int sum(list_t list);
+int sum(list_t list)
+{
+	return sum_helper(list, 0);
+}
+
+/*
+ * Effects: Returns the product of each element in list, product helper function
+ */
+
+static int product_helper(list_t list, int result)
+{
+	if (list_isEmpty(list)) return result;
+
+	return sum_helper(list_rest(list), list_first(list) * result);
+}
 
 /*
  * EFFECTS: returns the product of each element in list
  *          one if the list is empty.
  */
-int product(list_t list);
+int product(list_t list)
+{
+	return product_helper(list, 1)
+}
 
 /*
  * REQUIRES: fn must be associative.
@@ -192,6 +216,3 @@ bool contained_by(tree_t A, tree_t B);
  *       any element to be inserted.
  */
 tree_t insert_tree(int elt, tree_t tree);
-
-
-#endif /* P2_H */
