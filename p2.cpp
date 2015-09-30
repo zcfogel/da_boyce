@@ -36,7 +36,7 @@ static int product_helper(list_t list, int result)
  */
 int product(list_t list)
 {
-	return product_helper(list, 1)
+	return product_helper(list, 1);
 }
 
 /*
@@ -57,19 +57,56 @@ int product(list_t list)
  * The "identity" argument is typically the value for which
  * fn(X, identity) == X and fn(identity, X) == X for any X.
  */
-int accumulate(list_t list, int (*fn)(int, int), int identity);
+static int accumulate_helper(list_t list, int (*fn)(int, int), int identity, int total)
+{
+	if (list_isEmpty(list)) return total;
+	return accumulate_helper(list_rest(list), fn, identity, fn(list_first(list),total));
+}
+int accumulate(list_t list, int (*fn)(int, int), int identity)
+
+{
+	if (list_isEmpty(list)) return identity;
+	int total = identity;
+	return accumulate_helper(list_rest(list), fn, identity, fn(list_first (list), total));
+}
 
 /*
  * EFFECTS: returns the reverse of list
  *
  * For example: the reverse of ( 3 2 1 ) is ( 1 2 3 )
  */
-list_t reverse(list_t list);
+static list_t reverse_helper(list_t list, list_t temp)
+{
+	if (list_isEmpty (list))
+	{
+		return temp;
+	}
+	list_make (list_first(list), temp);
+	return reverse_helper (list_rest (list), temp);
+}
+list_t reverse(list_t list)
+{
+	list_t temp = list_make();
+	return reverse_helper (list, temp);
+
+}
 
 /*
  * EFFECTS: returns the list (first second)
  */
-list_t append(list_t first, list_t second);
+static list_t append_helper(list_t first, list_t second)
+{
+	if (list_isEmpty (first))
+	{
+		return second;
+	}
+	list_make (list_first (first), second);
+	return append_helper (list_rest(first), second);
+}
+list_t append(list_t first, list_t second)
+{
+	return append_helper (reverse(first),second);
+}
 
 /*
  * EFFECTS: returns a new list containing only the elements of the
@@ -79,7 +116,18 @@ list_t append(list_t first, list_t second);
  * For example, if you applied filter_odd to the list ( 4 1 3 0 )
  * you would get the list ( 1 3 )
  */
-list_t filter_odd(list_t list);
+ static list_t odd_helper(list_t list, list_t odd_list)
+{
+	if (list_isEmpty(list)) return reverse(odd_list);
+	if (list_first(list) % 2 != 0) list_make(list_first(list), odd_list);
+	return odd_helper(list_rest(list), odd_list);
+}
+
+list_t filter_odd(list_t list)
+{
+	list_t odd_list = list_make();
+	return odd_helper(list, odd_list);
+}
 
 /*
  * EFFECTS: returns a new list containing only the elements of the
@@ -89,14 +137,39 @@ list_t filter_odd(list_t list);
  * For example, if you applied filter_odd to the list ( 4 1 3 0 )
  * you would get the list ( 4 0 )
  */
-list_t filter_even(list_t list);
+ static list_t even_helper(list_t list, list_t even_list)
+{
+	if (list_isEmpty(list)) return reverse(even_list);
+	if (list_first(list) % 2 != 0) {list_make(list_first(list), even_list);}
+	return even_helper(list_rest(list), even_list);
+}
+
+list_t filter_even(list_t list)
+{
+	list_t even_list = list_make();
+	return even_helper(list, even_list);
+}
 
 /*
  * EFFECTS: returns a new list containing precisely the elements of list
  *          for which the predicate fn() evaluates to true, in the
  *          order in which  they appeared in list.
  */
-list_t filter(list_t list, bool (*fn)(int));
+ static list_t filter_helper(list_t list, list_t filter_list, bool (*fn)(int))
+{
+	if (list_isEmpty(list)) return reverse(filter_list);
+	if ((*fn)(list_first(list)))
+	{ 
+		list_make(list_first(list), filter_list);
+	}
+	return filter_helper (list_rest(list), filter_list, fn);
+}
+
+list_t filter(list_t list, bool (*fn)(int))
+{
+	list_t filter_list = list_make();
+	return filter_helper(list, filter_list, fn);
+}
 
 /*
  * REQUIRES: n >= 0
@@ -126,7 +199,21 @@ list_t insert_list(list_t first, list_t second, int n);
  * EFFECTS: returns the list equal to list without its last n
  *          elements
  */
-list_t chop(list_t list, int n);
+
+
+static int chop_help(list_t list, list_t chop_list, int say_when, int n)
+{
+	if (say_when == n) return reverse(chop_list);
+	list_make(list_first(list), chop_list);
+	++ say_when;
+	return chop_help(list_rest(list), chop_list, say_when, n);
+}
+
+list_t chop(list_t list, int n)
+{
+	list_t chop_list = list_make();
+	return chop_help(list, chop_list, 0, n);
+}
 
 /*
  * REQUIRES: n >= 0
@@ -136,6 +223,11 @@ list_t chop(list_t list, int n);
  *          fib(n) = fib(n-1) + fib(n-2) for (n>1).
  * This must be recursive but need not be tail recursive
  */
+
+
+
+
+
 int fib(int n);
 
 /*
